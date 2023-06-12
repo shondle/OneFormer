@@ -50,7 +50,7 @@ if __name__ == '__main__':
     image_dirs, label_dirs = get_files(query)
 
 
-    DatasetCatalog.register("SemanticAssemblyDataset", assembly_dataset(image_dirs, label_dirs))
+    DatasetCatalog.register("assembly_train", assembly_dataset(image_dirs, label_dirs))
     MetadataCatalog.get("SemanticAssemblyDatset").stuff_classes = ["background", "left_hand", "right_hand"]
     MetadataCatalog.get("SemanticAssemblyDatset").evaluator_type = ["sem_seg"]
 
