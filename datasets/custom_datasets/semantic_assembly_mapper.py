@@ -19,11 +19,12 @@ from detectron2.data import MetadataCatalog
 from detectron2.projects.point_rend import ColorAugSSDTransform
 from oneformer.data.tokenizer import SimpleTokenizer, Tokenize
 import pycocotools.mask as mask_util
+from PIL import Image
+import PIL
+__all__ = ["AssemblySemanticDatasetMapper"]
 
-__all__ = ["AssemblySemanticCustomDatasetMapper"]
 
-
-class AssemblyDatasetMapper:
+class AssemblySemanticDatasetMapper:
     """
     A callable which takes a dataset dict in Detectron2 Dataset format,
     and map it into a format used by OneFormer custom semantic segmentation.
@@ -173,6 +174,19 @@ class AssemblyDatasetMapper:
         if "sem_seg_file_name" in dataset_dict:
             # PyTorch transformation not implemented for uint16, so converting it to double first
             sem_seg_gt = utils.read_image(dataset_dict.pop("sem_seg_file_name")).astype("double")
+
+            mask = Image.open(dataset_dict.pop("sem_seg_file_name"))
+
+            transform = transforms.Compose ([
+                # transforms.Resize(size=(161, 161), interpolation=PIL.Image.NEAREST),
+                transforms.ToTensor()
+            ])
+
+            mask = transform(mask)
+
+            sem_seg_gt = mask[0, :, :] + mask[1, :, :] + torch.mul(mask[2, :, :], 2)
+
+
         else:
             sem_seg_gt = None
 
@@ -200,8 +214,8 @@ class AssemblyDatasetMapper:
         # ascontigarr creates a new array -> new block of memory
         # converts to tensor
         image = torch.as_tensor(np.ascontiguousarray(image.transpose(2, 0, 1)))
-        if sem_seg_gt is not None:
-            sem_seg_gt = torch.as_tensor(sem_seg_gt.astype("long")) # makes sure the segmentation masks are of type long
+        # if sem_seg_gt is not None:
+        #     sem_seg_gt = torch.as_tensor(sem_seg_gt.astype("long")) # makes sure the segmentation masks are of type long
 
         # if you want padding, the following gets executed
         if self.size_divisibility > 0:

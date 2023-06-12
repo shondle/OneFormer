@@ -67,6 +67,7 @@ from oneformer.utils.events import WandbWriter, setup_wandb
 from time import sleep
 from oneformer.data.build import *
 from oneformer.data.dataset_mappers.dataset_mapper import DatasetMapper
+from datasets.custom_datasets.semantic_assembly_mapper import AssemblySemanticDatasetMapper
 
 class Trainer(DefaultTrainer):
     """
@@ -163,6 +164,9 @@ class Trainer(DefaultTrainer):
         # coco unified segmentation lsj new baseline
         elif cfg.INPUT.DATASET_MAPPER_NAME == "coco_unified_lsj":
             mapper = COCOUnifiedNewBaselineDatasetMapper(cfg, True)
+            return build_detection_train_loader(cfg, mapper=mapper)
+        elif cfg.INPUT.DATASET_MAPPER_NAME == "assembly":
+            mapper = AssemblySemanticDatasetMapper(cfg, True)
             return build_detection_train_loader(cfg, mapper=mapper)
         else:
             mapper = None
